@@ -7,6 +7,7 @@ const typeDefs = gql`
     taskType: TaskType
     executor: User
     description: String
+    important: Boolean
   }
 
   input TaskInput {
@@ -14,6 +15,7 @@ const typeDefs = gql`
     taskTypeId: ID!
     executorId: ID!
     description: String!
+    important: Boolean!
   }
 
   input TaskUpdateInput {
@@ -21,6 +23,7 @@ const typeDefs = gql`
     taskTypeId: Int
     executorId: Int
     description: String
+    important: Boolean
   }
 
   type TaskType {
@@ -64,12 +67,16 @@ const tasks = [
     title: "Задача 1",
     taskTypeId: 1,
     executorId: 1,
+    description: "123",
+    important: true,
   },
   {
     id: 2,
     title: "Задача 2",
     taskTypeId: 2,
     executorId: 2,
+    description:"1234",
+    important: true,
   },
 ];
 const users = [
@@ -99,7 +106,6 @@ const resolvers = {
         name !== undefined && name !== ""
           ? users.filter((user) => user.name.search(user) !== -1)
           : users,
-    
   },
   Mutation: {
     addTask: (_, { input }) => {
@@ -107,7 +113,9 @@ const resolvers = {
         id: tasks.length + 1,
         title: input.title,
         taskTypeId: parseInt(input.taskTypeId),
+        executorId: parseInt(input.executorId),
         description: input.description,
+        important: input.important,
       };
 
       tasks.push(newTask);

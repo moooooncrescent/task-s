@@ -11,6 +11,9 @@ const Form = styled.div`
   input {
     width: 100%;
   }
+  input[type="checkbox"] {
+    width: auto;
+  }
 `;
 
 const NEW_TASK = gql`
@@ -23,11 +26,11 @@ const NEW_TASK = gql`
         id
         name
       }
-      
       taskType {
         id
         name
       }
+      important
     }
   }
 `;
@@ -49,7 +52,6 @@ const GET_USERS = gql`
   }
 `;
 
-
 const TaskCreatePage = () => {
   let history = useHistory();
 
@@ -58,16 +60,23 @@ const TaskCreatePage = () => {
     description: "",
     taskType: null,
     executor: null,
+    important: false,
   });
 
   const [getTaskTypes, { data: taskTypesData }] = useLazyQuery(GET_TYPES);
-  const [getUsers, {data: usersData}] = useLazyQuery(GET_USERS);
+  const [getUsers, { data: usersData }] = useLazyQuery(GET_USERS);
   const [addTask] = useMutation(NEW_TASK, {
     variables: {
-      input: { title: newTask.title, taskTypeId: newTask.taskType?.value, executorId: newTask.executor?.value, description: newTask.description },
+      input: {
+        title: newTask.title,
+        taskTypeId: newTask.taskType?.value,
+        executorId: newTask.executor?.value,
+        description: newTask.description,
+        important: newTask.important,
+      },
     },
   });
-console.log()
+  console.log(newTask);
   return (
     <Form>
       <div>
@@ -92,7 +101,7 @@ console.log()
             onChange={(taskType) => {
               setNewTask({
                 ...newTask,
-                taskType: taskType, 
+                taskType: taskType,
               });
             }}
             loadOptions={(inputValue) =>
@@ -113,7 +122,9 @@ console.log()
           />
         </label>
       </div>
-      <div>Исполнитель</div>
+      <div>
+        <label>
+          <div>Исполнитель</div>
           <AsyncSelect
             cacheOptions
             defaultOptions
@@ -121,7 +132,7 @@ console.log()
             onChange={(executor) => {
               setNewTask({
                 ...newTask,
-                executor: executor, 
+                executor: executor,
               });
             }}
             loadOptions={(inputValue) =>
@@ -140,36 +151,53 @@ console.log()
               })
             }
           />
+        </label>
+      </div>
+      <div>
+        <label>
           <div>Описание</div>
-          <input    type="text"
+          <input
+            type="text"
             value={newTask.description}
             onChange={(event) =>
               setNewTask({ ...newTask, description: event.target.value })
-              
-            } ></input>
-      <div>
-        <button
-          onClick={() => {
-            addTask()
-              .then((newTask) => {
-                setNewTask({
-                  title: "",
-                  taskType: null,
-                  executor: "",
-                  description:"",
-                });
-
-                history.push(`/task/${newTask.data.addTask.id}`);
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          }}
-        >
-          Сохранить
-        </button>
+            }
+          ></input>
+        </label>
       </div>
-      
+      <div>
+        <label>
+          <span>Важное</span>
+          <input
+            type="checkbox"
+            value={newTask.important}
+            onChange={(event) =>
+              setNewTask({ ...newTask, important: event.target.checked })
+            }
+          />
+        </label>
+      </div>
+      <button
+        onClick={() => {
+          addTask()
+            .then((newTask) => {
+              setNewTask({
+                title: "",
+                taskType: null,
+                executor: null,
+                description: "",
+                important: null,
+              });
+
+              history.push(`/task/${newTask.data.addTask.id}`);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }}
+      >
+        Сохранить
+      </button>
     </Form>
   );
 };

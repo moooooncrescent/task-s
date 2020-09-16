@@ -11,6 +11,9 @@ const Form = styled.div`
   input {
     width: 100%;
   }
+  input[type="checkbox"] {
+    width: auto;
+  }
 `;
 
 const GET_TASK = gql`
@@ -26,18 +29,20 @@ const GET_TASK = gql`
         id
         name
       }
+      description
+      important
     }
   }
 `;
 
 const GET_USERS = gql`
   query GetUsers($name: String) {
-    users(name: $name ) {
+    users(name: $name) {
       id
       name
     }
   }
-`
+`;
 
 const GET_TYPES = gql`
   query GetTaskTypes($name: String) {
@@ -61,6 +66,8 @@ const UPDATE_TASK = gql`
         id
         name
       }
+      description
+      important
     }
   }
 `;
@@ -74,10 +81,12 @@ const TaskEditPage = () => {
     title: "",
     taskType: null,
     executor: null,
+    description: "",
+    important: false,
   });
 
   const [getTaskTypes, { data: taskTypesData }] = useLazyQuery(GET_TYPES);
-  const [getUsers, {data: usersData}] = useLazyQuery(GET_USERS);
+  const [getUsers, { data: usersData }] = useLazyQuery(GET_USERS);
   const { loading, error } = useQuery(GET_TASK, {
     variables: {
       id: taskId,
@@ -87,6 +96,8 @@ const TaskEditPage = () => {
       setTask({
         id: data.task?.id,
         title: data.task?.title,
+        description: data.task?.description,
+        important: data.task?.important,
         executor: {
           value: parseInt(data.task?.executor?.id),
           label: data.task?.executor?.name,
@@ -100,13 +111,19 @@ const TaskEditPage = () => {
   const [updateTask] = useMutation(UPDATE_TASK, {
     variables: {
       id: task.id,
-      input: { title: task.title, taskTypeId: task.taskType?.value, executorId: task.executor?.value },
+      input: {
+        title: task.title,
+        taskTypeId: task.taskType?.value,
+        executorId: task.executor?.value,
+        description: task.description,
+        important: task.important,
+      },
     },
   });
   if (loading) return <p>Loading...</p>;
 
   if (error) return <p>Error :(</p>;
-    console.log(task.executor)
+  console.log(task.important);
   return (
     <Form>
       <div>
@@ -152,37 +169,61 @@ const TaskEditPage = () => {
             }
           />
         </label>
-        <div>Исполнитель</div>
-          <AsyncSelect
-            cacheOptions
-            defaultOptions
-            value={task.executor}
-            onChange={(executor) => {
-              setTask({
-                ...task,
-                executor: executor,
-              });
-            }}
-            loadOptions={(inputValue) =>
-              new Promise((resolve) => {
-                getUsers({
-                  variables: {
-                    name: inputValue,
-                  },
+        <div>
+          <label>
+            <div>Исполнитель</div>
+            <AsyncSelect
+              cacheOptions
+              defaultOptions
+              value={task.executor}
+              onChange={(executor) => {
+                setTask({
+                  ...task,
+                  executor: executor,
                 });
+              }}
+              loadOptions={(inputValue) =>
+                new Promise((resolve) => {
+                  getUsers({
+                    variables: {
+                      name: inputValue,
+                    },
+                  });
 
-                const options = usersData.users.map((user) => ({
-                  value: parseInt(user.id),
-                  label: user.name,
-                }));
+                  const options = usersData.users.map((user) => ({
+                    value: parseInt(user.id),
+                    label: user.name,
+                  }));
 
-                resolve(options);
-              })
+                  resolve(options);
+                })
+              }
+            />
+          </label>
+        </div>
+      </div>
+      <label>
+        <div>Описание</div>
+        <input
+          type="text"
+          value={task.description}
+          onChange={(event) =>
+            setTask({ ...task, description: event.target.value })
+          }
+        />
+      </label>
+      <div>
+        <label>
+          <span>Важное</span>
+          <input
+            type="checkbox"
+            checked={task.important}
+            onChange={(event) =>
+              setTask({ ...task, important: event.target.checked })
             }
           />
+        </label>
       </div>
-      <div>Описание</div>
-
       <div>
         <button
           onClick={() => {
@@ -198,11 +239,8 @@ const TaskEditPage = () => {
           Сохранить
         </button>
       </div>
-
-    
     </Form>
   );
-          
 };
 
 export default TaskEditPage;

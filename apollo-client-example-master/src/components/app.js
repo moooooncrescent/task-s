@@ -20,10 +20,10 @@ const App = () => {
         <nav>
           <ul>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/">Домой</Link>
             </li>
             <li>
-              <Link to="/task/list">Tasks</Link>
+              <Link to="/task/list">Задачи</Link>
             </li>
           </ul>
         </nav>

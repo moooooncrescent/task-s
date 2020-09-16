@@ -39,20 +39,22 @@ const TaskListPage = () => {
         <Link to="/task/create">Добавить задачу</Link>
       </div>
       <List>
-        <thead>
-          <tr>
-            <th>Название задачи</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks?.map((task) => (
-            <tr key={`task-${task.id}`}>
-              <td>
-                <Link to={`/task/${task.id}`}>{task.title}</Link>
-              </td>
+        <table className="table text-center">
+          <thead>
+            <tr>
+              <th>Название задачи</th>
             </tr>
-          ))}
-        </tbody>
+          </thead>
+          <tbody>
+            {tasks?.map((task) => (
+              <tr key={`task-${task.id}`}>
+                <td>
+                  <Link to={`/task/${task.id}`}>{task.title}</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </List>
     </div>
   );

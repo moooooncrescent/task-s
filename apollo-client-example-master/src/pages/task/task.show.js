@@ -7,6 +7,7 @@ const GET_BOOK = gql`
     task(id: $id) {
       id
       title
+      description
       taskType {
         id
         name
@@ -15,6 +16,7 @@ const GET_BOOK = gql`
         id
         name
       }
+      important
     }
   }
 `;
@@ -31,9 +33,9 @@ const TaskShowPage = () => {
     onCompleted: (data) => setTask(data.task),
   });
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Загрузка...</p>;
 
-  if (error) return <p>Error :(</p>;
+  if (error) return <p>Ошибка :(</p>;
 
   return (
     <div>
@@ -47,23 +49,31 @@ const TaskShowPage = () => {
           </li>
         </ul>
       </div>
-      <table>
+      <table className="table">
         <tbody>
           <tr>
-            <th>ID</th>
+            <th>Номер задачи</th>
             <td>{task?.id}</td>
           </tr>
           <tr>
-            <th>Title</th>
+            <th>Название</th>
             <td>{task?.title}</td>
           </tr>
           <tr>
-            <th>TaskType</th>
+            <th>Тип</th>
             <td>{task?.taskType?.name}</td>
           </tr>
           <tr>
-            <th>Executor</th>
-          <td>{task?.executor?.name}</td>
+            <th>Исполнитель</th>
+            <td>{task?.executor?.name}</td>
+          </tr>
+          <tr>
+            <th>Описание</th>
+            <td>{task?.description}</td>
+          </tr>
+          <tr>
+            <th>Важное</th>
+            <td>{task?.important ? "Да" : "Нет"}</td>
           </tr>
         </tbody>
       </table>
